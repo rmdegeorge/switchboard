@@ -1,0 +1,71 @@
+import { UIMessage } from "@shared/messages";
+import { saveRules, saveEnabled } from "@shared/storage";
+import { getState, setState, addRule, updateRule, deleteRule } from "./state";
+import { attachToTab, detachFromTab, updateAllTabs } from "./debuggerManager";
+import { resolveRequest } from "./fetchInterceptor";
+import { broadcastStateUpdate } from "./index";
+
+async function handleMessage(
+  message: UIMessage,
+  _sender: chrome.runtime.MessageSender,
+): Promise<any> {
+  switch (message.type) {
+    case "GET_STATE":
+      return getState();
+
+    case "SET_ENABLED": {
+      setState({ enabled: message.enabled });
+      await saveEnabled(message.enabled);
+      broadcastStateUpdate();
+      return getState();
+    }
+
+    case "ADD_RULE": {
+      addRule(message.rule);
+      await saveRules(getState().rules);
+      await updateAllTabs();
+      broadcastStateUpdate();
+      return getState();
+    }
+
+    case "UPDATE_RULE": {
+      updateRule(message.rule);
+      await saveRules(getState().rules);
+      await updateAllTabs();
+      broadcastStateUpdate();
+      return getState();
+    }
+
+    case "DELETE_RULE": {
+      deleteRule(message.ruleId);
+      await saveRules(getState().rules);
+      await updateAllTabs();
+      broadcastStateUpdate();
+      return getState();
+    }
+
+    case "ATTACH_TAB": {
+      await attachToTab(message.tabId);
+      broadcastStateUpdate();
+      return getState();
+    }
+
+    case "DETACH_TAB": {
+      await detachFromTab(message.tabId);
+      broadcastStateUpdate();
+      return getState();
+    }
+
+    case "RESOLVE_REQUEST": {
+      await resolveRequest(message.requestId, message.tabId, message.resolution);
+      return getState();
+    }
+  }
+}
+
+export function setupMessageHandler(): void {
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    handleMessage(message as UIMessage, sender).then(sendResponse).catch(console.error);
+    return true; // Keep the message channel open for async response
+  });
+}
