@@ -1,7 +1,7 @@
 import React from "react";
 import { ulid } from "ulid";
 
-interface Header {
+export interface Header {
   id: string;
   name: string;
   value: string;

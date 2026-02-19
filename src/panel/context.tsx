@@ -52,7 +52,9 @@ export function PanelProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    sendToBackground({ type: "GET_STATE" }).then((s) => dispatch({ type: "SET_STATE", state: s }));
+    sendToBackground({ type: "GET_STATE" })
+      .then((s) => dispatch({ type: "SET_STATE", state: s }))
+      .catch((err) => console.error("GET_STATE failed:", err));
 
     const listener = (message: BackgroundMessage) => {
       if (message.type === "STATE_UPDATED") {
@@ -66,44 +68,72 @@ export function PanelProvider({ children }: { children: React.ReactNode }) {
   const setView = useCallback((view: PanelView) => dispatch({ type: "SET_VIEW", view }), []);
 
   const setEnabled = useCallback(async (enabled: boolean) => {
-    const s = await sendToBackground({ type: "SET_ENABLED", enabled });
-    dispatch({ type: "SET_STATE", state: s });
+    try {
+      const s = await sendToBackground({ type: "SET_ENABLED", enabled });
+      dispatch({ type: "SET_STATE", state: s });
+    } catch (err) {
+      console.error("setEnabled failed:", err);
+    }
   }, []);
 
   const addRule = useCallback(async (rule: InterceptRule) => {
-    const s = await sendToBackground({ type: "ADD_RULE", rule });
-    dispatch({ type: "SET_STATE", state: s });
+    try {
+      const s = await sendToBackground({ type: "ADD_RULE", rule });
+      dispatch({ type: "SET_STATE", state: s });
+    } catch (err) {
+      console.error("addRule failed:", err);
+    }
   }, []);
 
   const updateRule = useCallback(async (rule: InterceptRule) => {
-    const s = await sendToBackground({ type: "UPDATE_RULE", rule });
-    dispatch({ type: "SET_STATE", state: s });
+    try {
+      const s = await sendToBackground({ type: "UPDATE_RULE", rule });
+      dispatch({ type: "SET_STATE", state: s });
+    } catch (err) {
+      console.error("updateRule failed:", err);
+    }
   }, []);
 
   const deleteRule = useCallback(async (ruleId: string) => {
-    const s = await sendToBackground({ type: "DELETE_RULE", ruleId });
-    dispatch({ type: "SET_STATE", state: s });
+    try {
+      const s = await sendToBackground({ type: "DELETE_RULE", ruleId });
+      dispatch({ type: "SET_STATE", state: s });
+    } catch (err) {
+      console.error("deleteRule failed:", err);
+    }
   }, []);
 
   const attachTab = useCallback(async (tabId: number) => {
-    const s = await sendToBackground({ type: "ATTACH_TAB", tabId });
-    dispatch({ type: "SET_STATE", state: s });
+    try {
+      const s = await sendToBackground({ type: "ATTACH_TAB", tabId });
+      dispatch({ type: "SET_STATE", state: s });
+    } catch (err) {
+      console.error("attachTab failed:", err);
+    }
   }, []);
 
   const detachTab = useCallback(async (tabId: number) => {
-    const s = await sendToBackground({ type: "DETACH_TAB", tabId });
-    dispatch({ type: "SET_STATE", state: s });
+    try {
+      const s = await sendToBackground({ type: "DETACH_TAB", tabId });
+      dispatch({ type: "SET_STATE", state: s });
+    } catch (err) {
+      console.error("detachTab failed:", err);
+    }
   }, []);
 
   const resolveRequest = useCallback(
     async (requestId: string, tabId: number, resolution: PausedRequestResolution) => {
-      const s = await sendToBackground({
-        type: "RESOLVE_REQUEST",
-        requestId,
-        tabId,
-        resolution,
-      });
-      dispatch({ type: "SET_STATE", state: s });
+      try {
+        const s = await sendToBackground({
+          type: "RESOLVE_REQUEST",
+          requestId,
+          tabId,
+          resolution,
+        });
+        dispatch({ type: "SET_STATE", state: s });
+      } catch (err) {
+        console.error("resolveRequest failed:", err);
+      }
     },
     [],
   );

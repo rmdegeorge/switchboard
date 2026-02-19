@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { PausedRequest } from "@shared/types";
 import { usePanel } from "../context";
-import HeadersEditor, { createHeader } from "./HeadersEditor";
+import HeadersEditor, { createHeader, Header } from "./HeadersEditor";
 import RequestBodyEditor from "./RequestBodyEditor";
 import ResponseBodyEditor from "./ResponseBodyEditor";
 
@@ -9,11 +9,11 @@ interface Props {
   request: PausedRequest;
 }
 
-function toEditorHeaders(headers: Array<{ name: string; value: string }>) {
+function toEditorHeaders(headers: Array<{ name: string; value: string }>): Header[] {
   return headers.map((h) => createHeader(h.name, h.value));
 }
 
-function fromEditorHeaders(headers: Array<{ id: string; name: string; value: string }>) {
+function fromEditorHeaders(headers: Header[]): Array<{ name: string; value: string }> {
   return headers.map(({ name, value }) => ({ name, value }));
 }
 

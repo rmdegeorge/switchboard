@@ -6,17 +6,6 @@ import { attachToTab, detachFromTab, updateAllTabs } from "./debuggerManager";
 import { resolveRequest } from "./fetchInterceptor";
 import { broadcastStateUpdate } from "./index";
 
-const KNOWN_TYPES = new Set<UIMessage["type"]>([
-  "GET_STATE",
-  "SET_ENABLED",
-  "ADD_RULE",
-  "UPDATE_RULE",
-  "DELETE_RULE",
-  "ATTACH_TAB",
-  "DETACH_TAB",
-  "RESOLVE_REQUEST",
-]);
-
 async function handleMessage(
   message: UIMessage,
   sender: chrome.runtime.MessageSender,
@@ -26,8 +15,12 @@ async function handleMessage(
     return getState();
   }
 
-  // Validate message type
-  if (!message?.type || !KNOWN_TYPES.has(message.type)) {
+  // Reject non-UIMessage messages (e.g. broadcast self-delivery of BackgroundMessage)
+  const UI_MESSAGE_TYPES: Set<string> = new Set<UIMessage["type"]>([
+    "GET_STATE", "SET_ENABLED", "ADD_RULE", "UPDATE_RULE",
+    "DELETE_RULE", "ATTACH_TAB", "DETACH_TAB", "RESOLVE_REQUEST",
+  ]);
+  if (!message?.type || !UI_MESSAGE_TYPES.has(message.type)) {
     return getState();
   }
 
@@ -83,6 +76,12 @@ async function handleMessage(
 
     case "RESOLVE_REQUEST": {
       await resolveRequest(message.requestId, message.tabId, message.resolution);
+      return getState();
+    }
+
+    default: {
+      const _exhaustive: never = message;
+      console.warn("Unhandled message type:", (_exhaustive as UIMessage).type);
       return getState();
     }
   }

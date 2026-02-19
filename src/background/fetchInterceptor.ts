@@ -33,11 +33,11 @@ function matchesRule(
   const regex = urlPatternToRegex(rule.urlPattern);
   if (!regex.test(event.request.url)) return false;
 
-  if (rule.resourceTypes.length > 0 && !rule.resourceTypes.includes(event.resourceType as any)) {
+  if (rule.resourceTypes.length > 0 && !rule.resourceTypes.some((t) => t === event.resourceType)) {
     return false;
   }
 
-  if (rule.httpMethods?.length > 0 && !rule.httpMethods.includes(event.request.method as any)) {
+  if (rule.httpMethods?.length > 0 && !rule.httpMethods.some((m) => m === event.request.method)) {
     return false;
   }
 
