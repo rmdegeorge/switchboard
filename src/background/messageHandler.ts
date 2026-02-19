@@ -1,14 +1,39 @@
 import { UIMessage } from "@shared/messages";
+import { ExtensionState } from "@shared/types";
 import { saveRules, saveEnabled } from "@shared/storage";
-import { getState, setState, addRule, updateRule, deleteRule } from "./state";
+import { getState, setState, addRule, updateRule, deleteRule, ready } from "./state";
 import { attachToTab, detachFromTab, updateAllTabs } from "./debuggerManager";
 import { resolveRequest } from "./fetchInterceptor";
 import { broadcastStateUpdate } from "./index";
 
+const KNOWN_TYPES = new Set<UIMessage["type"]>([
+  "GET_STATE",
+  "SET_ENABLED",
+  "ADD_RULE",
+  "UPDATE_RULE",
+  "DELETE_RULE",
+  "ATTACH_TAB",
+  "DETACH_TAB",
+  "RESOLVE_REQUEST",
+]);
+
 async function handleMessage(
   message: UIMessage,
-  _sender: chrome.runtime.MessageSender,
-): Promise<any> {
+  sender: chrome.runtime.MessageSender,
+): Promise<ExtensionState> {
+  // Validate sender is this extension
+  if (sender.id !== chrome.runtime.id) {
+    return getState();
+  }
+
+  // Validate message type
+  if (!message?.type || !KNOWN_TYPES.has(message.type)) {
+    return getState();
+  }
+
+  // Wait for state initialization before processing
+  await ready;
+
   switch (message.type) {
     case "GET_STATE":
       return getState();
@@ -65,7 +90,12 @@ async function handleMessage(
 
 export function setupMessageHandler(): void {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    handleMessage(message as UIMessage, sender).then(sendResponse).catch(console.error);
+    handleMessage(message as UIMessage, sender)
+      .then(sendResponse)
+      .catch((err) => {
+        console.error("handleMessage failed:", err);
+        sendResponse(getState());
+      });
     return true; // Keep the message channel open for async response
   });
 }

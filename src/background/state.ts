@@ -8,6 +8,11 @@ let state: ExtensionState = {
   pausedRequests: [],
 };
 
+let readyResolve!: () => void;
+export const ready: Promise<void> = new Promise((resolve) => {
+  readyResolve = resolve;
+});
+
 export function getState(): ExtensionState {
   return state;
 }
@@ -48,7 +53,13 @@ export function deleteRule(ruleId: string): void {
 }
 
 export async function initState(): Promise<void> {
-  const [rules, enabled] = await Promise.all([loadRules(), loadEnabled()]);
-  state.rules = rules;
-  state.enabled = enabled;
+  try {
+    const [rules, enabled] = await Promise.all([loadRules(), loadEnabled()]);
+    state.rules = rules;
+    state.enabled = enabled;
+  } catch (err) {
+    console.error("initState: failed to load from storage, using defaults:", err);
+  } finally {
+    readyResolve();
+  }
 }

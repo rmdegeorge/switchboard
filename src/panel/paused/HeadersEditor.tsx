@@ -1,8 +1,19 @@
 import React from "react";
+import { ulid } from "ulid";
+
+interface Header {
+  id: string;
+  name: string;
+  value: string;
+}
 
 interface Props {
-  headers: Array<{ name: string; value: string }>;
-  onChange: (headers: Array<{ name: string; value: string }>) => void;
+  headers: Header[];
+  onChange: (headers: Header[]) => void;
+}
+
+export function createHeader(name = "", value = ""): Header {
+  return { id: ulid(), name, value };
 }
 
 export default function HeadersEditor({ headers, onChange }: Props) {
@@ -16,13 +27,13 @@ export default function HeadersEditor({ headers, onChange }: Props) {
   };
 
   const addHeader = () => {
-    onChange([...headers, { name: "", value: "" }]);
+    onChange([...headers, createHeader()]);
   };
 
   return (
     <div className="headers-editor">
       {headers.map((header, i) => (
-        <div key={i} className="header-row">
+        <div key={header.id} className="header-row">
           <input
             type="text"
             value={header.name}

@@ -22,7 +22,7 @@ export function sendToBackground(message: UIMessage): Promise<ExtensionState> {
 }
 
 export function broadcastToUI(message: BackgroundMessage): void {
-  chrome.runtime.sendMessage(message).catch(() => {
-    // No listeners — popup/panel may be closed
+  chrome.runtime.sendMessage(message).catch((err) => {
+    console.debug("broadcastToUI: no listeners", err.message);
   });
 }

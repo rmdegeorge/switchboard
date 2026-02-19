@@ -17,8 +17,10 @@
       "version": "detect"
     }
   },
+  "plugins": ["react-hooks"],
   "extends": [
-    "eslint:recommended"
+    "eslint:recommended",
+    "plugin:react-hooks/recommended"
   ],
   "rules": {
     "no-unused-vars": "off",

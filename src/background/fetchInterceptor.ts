@@ -1,5 +1,7 @@
 import { InterceptRule, PausedRequest, PausedRequestResolution, RequestStage } from "@shared/types";
 import { broadcastToUI } from "@shared/messages";
+import { toBase64, fromBase64 } from "@shared/encoding";
+import { urlPatternToRegex } from "@shared/urlPattern";
 import { getState, addPausedRequest, removePausedRequest } from "./state";
 
 interface FetchRequestPausedEvent {
@@ -28,8 +30,7 @@ function matchesRule(
   if (!rule.enabled) return false;
   if (rule.requestStage !== stage) return false;
 
-  const pattern = rule.urlPattern.replace(/\*/g, ".*");
-  const regex = new RegExp(`^${pattern}$`, "i");
+  const regex = urlPatternToRegex(rule.urlPattern);
   if (!regex.test(event.request.url)) return false;
 
   if (rule.resourceTypes.length > 0 && !rule.resourceTypes.includes(event.resourceType as any)) {
@@ -68,10 +69,11 @@ async function getResponseBody(
     })) as { body: string; base64Encoded: boolean };
 
     if (result.base64Encoded) {
-      return atob(result.body);
+      return fromBase64(result.body);
     }
     return result.body;
-  } catch {
+  } catch (err) {
+    console.warn("getResponseBody failed:", err);
     return undefined;
   }
 }
@@ -123,7 +125,7 @@ async function handleModifyRequest(
     headers: mods.headers
       ? Object.entries(mods.headers).map(([name, value]) => ({ name, value }))
       : undefined,
-    postData: mods.postData ? btoa(mods.postData) : undefined,
+    postData: mods.postData ? toBase64(mods.postData) : undefined,
   });
 }
 
@@ -139,7 +141,7 @@ async function handleMockResponse(
     requestId: event.requestId,
     responseCode: mock.responseCode,
     responseHeaders: mock.responseHeaders,
-    body: mock.body ? btoa(mock.body) : undefined,
+    body: mock.body ? toBase64(mock.body) : undefined,
   });
 }
 
@@ -208,7 +210,7 @@ export async function resolveRequest(
           url: mods?.url,
           method: mods?.method,
           headers: mods?.headers,
-          postData: mods?.postData ? btoa(mods.postData) : undefined,
+          postData: mods?.postData ? toBase64(mods.postData) : undefined,
         });
         break;
       }
@@ -219,7 +221,7 @@ export async function resolveRequest(
             requestId,
             responseCode: mods.responseCode ?? 200,
             responseHeaders: mods.responseHeaders,
-            body: mods.body ? btoa(mods.body) : undefined,
+            body: mods.body ? toBase64(mods.body) : undefined,
           });
         } else {
           await chrome.debugger.sendCommand({ tabId }, "Fetch.continueResponse", { requestId });
@@ -231,7 +233,7 @@ export async function resolveRequest(
           requestId,
           responseCode: resolution.responseCode,
           responseHeaders: resolution.responseHeaders,
-          body: resolution.body ? btoa(resolution.body) : undefined,
+          body: resolution.body ? toBase64(resolution.body) : undefined,
         });
         break;
       case "fail":
@@ -251,7 +253,23 @@ export async function resolveRequest(
 export function setupFetchInterceptor(): void {
   chrome.debugger.onEvent.addListener((source, method, params) => {
     if (method === "Fetch.requestPaused" && source.tabId != null) {
-      handleRequestPaused(source.tabId, params as FetchRequestPausedEvent);
+      handleRequestPaused(source.tabId, params as FetchRequestPausedEvent).catch((err) => {
+        console.error("handleRequestPaused failed:", err);
+        // Attempt to continue the request so the tab doesn't hang
+        if (source.tabId != null) {
+          const event = params as FetchRequestPausedEvent;
+          const command = event.responseStatusCode != null
+            ? "Fetch.continueResponse"
+            : "Fetch.continueRequest";
+          chrome.debugger
+            .sendCommand({ tabId: source.tabId }, command, {
+              requestId: event.requestId,
+            })
+            .catch((fallbackErr) => {
+              console.warn("setupFetchInterceptor: fallback also failed:", fallbackErr);
+            });
+        }
+      });
     }
   });
 }

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { PausedRequest } from "@shared/types";
 import { usePanel } from "../context";
-import HeadersEditor from "./HeadersEditor";
+import HeadersEditor, { createHeader } from "./HeadersEditor";
 import RequestBodyEditor from "./RequestBodyEditor";
 import ResponseBodyEditor from "./ResponseBodyEditor";
 
@@ -9,13 +9,23 @@ interface Props {
   request: PausedRequest;
 }
 
+function toEditorHeaders(headers: Array<{ name: string; value: string }>) {
+  return headers.map((h) => createHeader(h.name, h.value));
+}
+
+function fromEditorHeaders(headers: Array<{ id: string; name: string; value: string }>) {
+  return headers.map(({ name, value }) => ({ name, value }));
+}
+
 export default function PausedRequestView({ request }: Props) {
   const { resolveRequest } = usePanel();
 
-  const [headers, setHeaders] = useState(request.headers);
+  const [headers, setHeaders] = useState(() => toEditorHeaders(request.headers));
   const [postData, setPostData] = useState(request.postData ?? "");
   const [responseBody, setResponseBody] = useState(request.responseBody ?? "");
-  const [responseHeaders, setResponseHeaders] = useState(request.responseHeaders ?? []);
+  const [responseHeaders, setResponseHeaders] = useState(() =>
+    toEditorHeaders(request.responseHeaders ?? []),
+  );
   const [responseCode, setResponseCode] = useState(request.responseStatusCode ?? 200);
 
   const handleContinue = () => {
@@ -23,7 +33,7 @@ export default function PausedRequestView({ request }: Props) {
       resolveRequest(request.requestId, request.tabId, {
         type: "continue",
         modifications: {
-          headers,
+          headers: fromEditorHeaders(headers),
           postData: postData || undefined,
         },
       });
@@ -32,7 +42,7 @@ export default function PausedRequestView({ request }: Props) {
         type: "continue-response",
         modifications: {
           responseCode,
-          responseHeaders,
+          responseHeaders: fromEditorHeaders(responseHeaders),
           body: responseBody || undefined,
         },
       });
@@ -43,7 +53,7 @@ export default function PausedRequestView({ request }: Props) {
     resolveRequest(request.requestId, request.tabId, {
       type: "fulfill",
       responseCode,
-      responseHeaders,
+      responseHeaders: fromEditorHeaders(responseHeaders),
       body: responseBody || undefined,
     });
   };

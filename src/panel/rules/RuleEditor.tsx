@@ -1,14 +1,11 @@
 import React, { useState } from "react";
+import { ulid } from "ulid";
 import { usePanel } from "../context";
 import { InterceptRule, RuleAction, RequestStage, HttpMethod } from "@shared/types";
 
 interface Props {
   rule: InterceptRule | null;
   onClose: () => void;
-}
-
-function generateId(): string {
-  return `rule_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 const ALL_HTTP_METHODS: HttpMethod[] = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"];
@@ -79,7 +76,7 @@ export default function RuleEditor({ rule, onClose }: Props) {
 
   const handleSave = () => {
     const newRule: InterceptRule = {
-      id: rule?.id ?? generateId(),
+      id: rule?.id ?? ulid(),
       enabled: rule?.enabled ?? true,
       label,
       urlPattern,

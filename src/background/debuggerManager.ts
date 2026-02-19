@@ -27,8 +27,8 @@ export async function attachToTab(tabId: number): Promise<void> {
 export async function detachFromTab(tabId: number): Promise<void> {
   try {
     await chrome.debugger.detach({ tabId });
-  } catch {
-    // Tab may already be closed
+  } catch (err) {
+    console.warn("detachFromTab: debugger already detached", err);
   }
   removeAttachedTab(tabId);
 }
@@ -40,8 +40,8 @@ export async function updatePatterns(tabId: number): Promise<void> {
     await chrome.debugger.sendCommand({ tabId }, "Fetch.enable", {
       patterns: patterns.length > 0 ? patterns : [{ urlPattern: "*", requestStage: "Request" }],
     });
-  } catch {
-    // Tab may have been closed or debugger detached
+  } catch (err) {
+    console.warn("updatePatterns: tab may have been closed", err);
   }
 }
 
@@ -54,6 +54,13 @@ export function setupDebuggerListeners(): void {
   chrome.debugger.onDetach.addListener((source) => {
     if (source.tabId != null) {
       removeAttachedTab(source.tabId);
+    }
+  });
+
+  chrome.tabs.onRemoved.addListener((tabId) => {
+    const { attachedTabs } = getState();
+    if (attachedTabs.includes(tabId)) {
+      removeAttachedTab(tabId);
     }
   });
 }

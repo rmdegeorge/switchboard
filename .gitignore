@@ -1,5 +1,41 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
+
+# Source maps
 *.js.map
+
+# Environment / secrets
+.env
+.env.*
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Logs
 *.log
+npm-debug.log*
+
+# Editor directories
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Chrome extension packaging
+*.zip
+*.crx
+*.pem
+
+# npm pack output
+*.tgz
+
+# Coverage
+coverage/
+
+# Cache
+.cache/
+.eslintcache
