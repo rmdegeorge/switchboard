@@ -1,4 +1,3 @@
-import React from "react";
 import { ulid } from "ulid";
 
 export interface Header {

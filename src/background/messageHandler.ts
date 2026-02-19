@@ -1,5 +1,5 @@
-import { UIMessage } from "@shared/messages";
-import { ExtensionState } from "@shared/types";
+import type { UIMessage } from "@shared/messages";
+import type { ExtensionState } from "@shared/types";
 import { saveRules, saveEnabled } from "@shared/storage";
 import { getState, setState, addRule, updateRule, deleteRule, ready } from "./state";
 import { attachToTab, detachFromTab, updateAllTabs } from "./debuggerManager";
@@ -17,8 +17,14 @@ async function handleMessage(
 
   // Reject non-UIMessage messages (e.g. broadcast self-delivery of BackgroundMessage)
   const UI_MESSAGE_TYPES: Set<string> = new Set<UIMessage["type"]>([
-    "GET_STATE", "SET_ENABLED", "ADD_RULE", "UPDATE_RULE",
-    "DELETE_RULE", "ATTACH_TAB", "DETACH_TAB", "RESOLVE_REQUEST",
+    "GET_STATE",
+    "SET_ENABLED",
+    "ADD_RULE",
+    "UPDATE_RULE",
+    "DELETE_RULE",
+    "ATTACH_TAB",
+    "DETACH_TAB",
+    "RESOLVE_REQUEST",
   ]);
   if (!message?.type || !UI_MESSAGE_TYPES.has(message.type)) {
     return getState();

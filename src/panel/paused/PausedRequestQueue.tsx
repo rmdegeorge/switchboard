@@ -1,5 +1,4 @@
-import React from "react";
-import { PausedRequest } from "@shared/types";
+import type { PausedRequest } from "@shared/types";
 
 interface Props {
   requests: PausedRequest[];

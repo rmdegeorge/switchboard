@@ -1,5 +1,4 @@
-import React from "react";
-import { InterceptRule } from "@shared/types";
+import type { InterceptRule } from "@shared/types";
 
 interface Props {
   rules: InterceptRule[];

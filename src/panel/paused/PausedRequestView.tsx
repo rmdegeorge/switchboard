@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { PausedRequest } from "@shared/types";
+import { useState } from "react";
+import type { PausedRequest } from "@shared/types";
 import { usePanel } from "../context";
-import HeadersEditor, { createHeader, Header } from "./HeadersEditor";
+import type { Header } from "./HeadersEditor";
+import HeadersEditor, { createHeader } from "./HeadersEditor";
 import RequestBodyEditor from "./RequestBodyEditor";
 import ResponseBodyEditor from "./ResponseBodyEditor";
 

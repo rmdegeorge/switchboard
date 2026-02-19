@@ -1,4 +1,3 @@
-import React from "react";
 import { PanelProvider, usePanel } from "./context";
 import RulesView from "./rules/RulesView";
 import PausedRequestsView from "./paused/PausedRequestsView";

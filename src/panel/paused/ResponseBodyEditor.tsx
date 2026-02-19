@@ -1,5 +1,3 @@
-import React from "react";
-
 interface Props {
   body: string;
   onChange: (body: string) => void;
@@ -8,7 +6,7 @@ interface Props {
 export default function ResponseBodyEditor({ body, onChange }: Props) {
   const formatJson = () => {
     try {
-      const parsed = JSON.parse(body);
+      const parsed: unknown = JSON.parse(body);
       onChange(JSON.stringify(parsed, null, 2));
     } catch {
       // Not valid JSON, leave as-is

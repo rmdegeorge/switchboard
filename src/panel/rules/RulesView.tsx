@@ -1,8 +1,7 @@
-import React, { useState } from "react";
-import { usePanel } from "../context";
+import { useState } from "react";
 import RuleList from "./RuleList";
 import RuleEditor from "./RuleEditor";
-import { InterceptRule } from "@shared/types";
+import type { InterceptRule } from "@shared/types";
 
 export default function RulesView() {
   const [editingRule, setEditingRule] = useState<InterceptRule | null>(null);

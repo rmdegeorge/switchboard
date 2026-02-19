@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ulid } from "ulid";
 import { usePanel } from "../context";
-import { InterceptRule, RuleAction, RequestStage, HttpMethod } from "@shared/types";
+import type { InterceptRule, RuleAction, RequestStage, HttpMethod } from "@shared/types";
 
 interface Props {
   rule: InterceptRule | null;
@@ -9,8 +9,6 @@ interface Props {
 }
 
 const ALL_HTTP_METHODS: HttpMethod[] = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"];
-
-const defaultAction: RuleAction = { type: "pause" };
 
 export default function RuleEditor({ rule, onClose }: Props) {
   const { addRule, updateRule } = usePanel();
@@ -26,13 +24,13 @@ export default function RuleEditor({ rule, onClose }: Props) {
 
   // Modify-request fields
   const [modUrl, setModUrl] = useState(
-    rule?.action.type === "modify-request" ? rule.action.modifications.url ?? "" : "",
+    rule?.action.type === "modify-request" ? (rule.action.modifications.url ?? "") : "",
   );
   const [modMethod, setModMethod] = useState(
-    rule?.action.type === "modify-request" ? rule.action.modifications.method ?? "" : "",
+    rule?.action.type === "modify-request" ? (rule.action.modifications.method ?? "") : "",
   );
   const [modPostData, setModPostData] = useState(
-    rule?.action.type === "modify-request" ? rule.action.modifications.postData ?? "" : "",
+    rule?.action.type === "modify-request" ? (rule.action.modifications.postData ?? "") : "",
   );
 
   // Mock-response fields
@@ -40,7 +38,7 @@ export default function RuleEditor({ rule, onClose }: Props) {
     rule?.action.type === "mock-response" ? rule.action.response.responseCode : 200,
   );
   const [mockBody, setMockBody] = useState(
-    rule?.action.type === "mock-response" ? rule.action.response.body ?? "" : "",
+    rule?.action.type === "mock-response" ? (rule.action.response.body ?? "") : "",
   );
 
   // Proxy fields
@@ -100,7 +98,12 @@ export default function RuleEditor({ rule, onClose }: Props) {
 
       <div className="form-group">
         <label>Label</label>
-        <input type="text" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="My rule" />
+        <input
+          type="text"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          placeholder="My rule"
+        />
       </div>
 
       <div className="form-group">
@@ -121,7 +124,9 @@ export default function RuleEditor({ rule, onClose }: Props) {
               type="checkbox"
               checked={httpMethods.length === ALL_HTTP_METHODS.length}
               ref={(el) => {
-                if (el) el.indeterminate = httpMethods.length > 0 && httpMethods.length < ALL_HTTP_METHODS.length;
+                if (el)
+                  el.indeterminate =
+                    httpMethods.length > 0 && httpMethods.length < ALL_HTTP_METHODS.length;
               }}
               onChange={(e) => {
                 setHttpMethods(e.target.checked ? [...ALL_HTTP_METHODS] : []);
@@ -150,7 +155,10 @@ export default function RuleEditor({ rule, onClose }: Props) {
 
       <div className="form-group">
         <label>Stage</label>
-        <select value={requestStage} onChange={(e) => setRequestStage(e.target.value as RequestStage)}>
+        <select
+          value={requestStage}
+          onChange={(e) => setRequestStage(e.target.value as RequestStage)}
+        >
           <option value="Request">Request</option>
           <option value="Response">Response</option>
         </select>
@@ -158,7 +166,10 @@ export default function RuleEditor({ rule, onClose }: Props) {
 
       <div className="form-group">
         <label>Action</label>
-        <select value={actionType} onChange={(e) => setActionType(e.target.value as RuleAction["type"])}>
+        <select
+          value={actionType}
+          onChange={(e) => setActionType(e.target.value as RuleAction["type"])}
+        >
           <option value="pause">Pause</option>
           <option value="modify-request">Modify Request</option>
           <option value="mock-response">Mock Response</option>
@@ -178,7 +189,11 @@ export default function RuleEditor({ rule, onClose }: Props) {
           </div>
           <div className="form-group">
             <label>Post Data (optional)</label>
-            <textarea value={modPostData} onChange={(e) => setModPostData(e.target.value)} rows={4} />
+            <textarea
+              value={modPostData}
+              onChange={(e) => setModPostData(e.target.value)}
+              rows={4}
+            />
           </div>
         </div>
       )}
@@ -204,7 +219,12 @@ export default function RuleEditor({ rule, onClose }: Props) {
         <div className="action-config">
           <div className="form-group">
             <label>Target URL</label>
-            <input type="text" value={proxyUrl} onChange={(e) => setProxyUrl(e.target.value)} placeholder="https://other-server.com/api" />
+            <input
+              type="text"
+              value={proxyUrl}
+              onChange={(e) => setProxyUrl(e.target.value)}
+              placeholder="https://other-server.com/api"
+            />
           </div>
         </div>
       )}

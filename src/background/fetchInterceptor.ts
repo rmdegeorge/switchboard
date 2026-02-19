@@ -1,4 +1,9 @@
-import { InterceptRule, PausedRequest, PausedRequestResolution, RequestStage } from "@shared/types";
+import type {
+  InterceptRule,
+  PausedRequest,
+  PausedRequestResolution,
+  RequestStage,
+} from "@shared/types";
 import { broadcastToUI } from "@shared/messages";
 import { toBase64, fromBase64 } from "@shared/encoding";
 import { urlPatternToRegex } from "@shared/urlPattern";
@@ -18,7 +23,9 @@ interface FetchRequestPausedEvent {
   responseErrorReason?: string;
 }
 
-function headersRecordToArray(headers: Record<string, string>): Array<{ name: string; value: string }> {
+function headersRecordToArray(
+  headers: Record<string, string>,
+): Array<{ name: string; value: string }> {
   return Object.entries(headers).map(([name, value]) => ({ name, value }));
 }
 
@@ -59,10 +66,7 @@ function findMatchingRule(
   return null;
 }
 
-async function getResponseBody(
-  tabId: number,
-  requestId: string,
-): Promise<string | undefined> {
+async function getResponseBody(tabId: number, requestId: string): Promise<string | undefined> {
   try {
     const result = (await chrome.debugger.sendCommand({ tabId }, "Fetch.getResponseBody", {
       requestId,
@@ -258,9 +262,8 @@ export function setupFetchInterceptor(): void {
         // Attempt to continue the request so the tab doesn't hang
         if (source.tabId != null) {
           const event = params as FetchRequestPausedEvent;
-          const command = event.responseStatusCode != null
-            ? "Fetch.continueResponse"
-            : "Fetch.continueRequest";
+          const command =
+            event.responseStatusCode != null ? "Fetch.continueResponse" : "Fetch.continueRequest";
           chrome.debugger
             .sendCommand({ tabId: source.tabId }, command, {
               requestId: event.requestId,

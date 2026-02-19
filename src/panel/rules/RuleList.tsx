@@ -1,6 +1,5 @@
-import React from "react";
 import { usePanel } from "../context";
-import { InterceptRule } from "@shared/types";
+import type { InterceptRule } from "@shared/types";
 
 interface Props {
   onEdit: (rule: InterceptRule) => void;
@@ -35,15 +34,15 @@ export default function RuleList({ onEdit }: Props) {
         {rules.map((rule) => (
           <tr key={rule.id} className={rule.enabled ? "" : "rule-disabled"}>
             <td>
-              <input
-                type="checkbox"
-                checked={rule.enabled}
-                onChange={() => handleToggle(rule)}
-              />
+              <input type="checkbox" checked={rule.enabled} onChange={() => handleToggle(rule)} />
             </td>
             <td>{rule.label}</td>
             <td className="mono">{rule.urlPattern}</td>
-            <td>{!rule.httpMethods?.length || rule.httpMethods.length === 7 ? "All" : rule.httpMethods.join(", ")}</td>
+            <td>
+              {!rule.httpMethods?.length || rule.httpMethods.length === 7
+                ? "All"
+                : rule.httpMethods.join(", ")}
+            </td>
             <td>{rule.requestStage}</td>
             <td>{rule.action.type}</td>
             <td>

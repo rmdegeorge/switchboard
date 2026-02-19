@@ -1,4 +1,9 @@
-import { ExtensionState, InterceptRule, PausedRequest, PausedRequestResolution } from "./types";
+import type {
+  ExtensionState,
+  InterceptRule,
+  PausedRequest,
+  PausedRequestResolution,
+} from "./types";
 
 // Messages from UI (popup/panel) → background
 export type UIMessage =
@@ -9,7 +14,12 @@ export type UIMessage =
   | { type: "DELETE_RULE"; ruleId: string }
   | { type: "ATTACH_TAB"; tabId: number }
   | { type: "DETACH_TAB"; tabId: number }
-  | { type: "RESOLVE_REQUEST"; requestId: string; tabId: number; resolution: PausedRequestResolution };
+  | {
+      type: "RESOLVE_REQUEST";
+      requestId: string;
+      tabId: number;
+      resolution: PausedRequestResolution;
+    };
 
 // Messages from background → UI
 export type BackgroundMessage =
@@ -22,7 +32,7 @@ export function sendToBackground(message: UIMessage): Promise<ExtensionState> {
 }
 
 export function broadcastToUI(message: BackgroundMessage): void {
-  chrome.runtime.sendMessage(message).catch((err) => {
-    console.debug("broadcastToUI: no listeners", err.message);
+  chrome.runtime.sendMessage(message).catch((err: unknown) => {
+    console.debug("broadcastToUI: no listeners", err instanceof Error ? err.message : err);
   });
 }

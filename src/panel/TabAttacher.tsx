@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { usePanel } from "./context";
 
 export default function TabAttacher() {
@@ -9,7 +9,11 @@ export default function TabAttacher() {
     chrome.tabs.query({}, (allTabs) => {
       setTabs(
         allTabs.filter(
-          (t) => t.id != null && t.url && !t.url.startsWith("chrome://") && !t.url.startsWith("chrome-extension://"),
+          (t) =>
+            t.id != null &&
+            t.url &&
+            !t.url.startsWith("chrome://") &&
+            !t.url.startsWith("chrome-extension://"),
         ),
       );
     });
@@ -46,7 +50,9 @@ export default function TabAttacher() {
         ))}
       </select>
       {state.extension.attachedTabs.length > 0 && (
-        <span className="attached-count">{state.extension.attachedTabs.length} tab(s) attached</span>
+        <span className="attached-count">
+          {state.extension.attachedTabs.length} tab(s) attached
+        </span>
       )}
     </div>
   );

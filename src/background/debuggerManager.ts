@@ -1,5 +1,5 @@
 import { CDP_VERSION } from "@shared/constants";
-import { InterceptRule } from "@shared/types";
+import type { InterceptRule } from "@shared/types";
 import { getState, addAttachedTab, removeAttachedTab } from "./state";
 
 function buildFetchPatterns(rules: InterceptRule[]) {

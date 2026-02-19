@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { ExtensionState } from "@shared/types";
-import { sendToBackground, BackgroundMessage } from "@shared/messages";
+import { useEffect, useState } from "react";
+import type { ExtensionState } from "@shared/types";
+import type { BackgroundMessage } from "@shared/messages";
+import { sendToBackground } from "@shared/messages";
 import StatusIndicator from "./StatusIndicator";
 import QuickToggle from "./QuickToggle";
 import ActiveRulesList from "./ActiveRulesList";
@@ -16,7 +17,9 @@ export default function App() {
   const [state, setState] = useState<ExtensionState>(initialState);
 
   useEffect(() => {
-    sendToBackground({ type: "GET_STATE" }).then(setState);
+    sendToBackground({ type: "GET_STATE" })
+      .then(setState)
+      .catch((err: unknown) => console.error("GET_STATE failed:", err));
 
     const listener = (message: BackgroundMessage) => {
       if (message.type === "STATE_UPDATED") {
@@ -27,13 +30,14 @@ export default function App() {
     return () => chrome.runtime.onMessage.removeListener(listener);
   }, []);
 
-  const handleToggle = async (enabled: boolean) => {
-    const newState = await sendToBackground({ type: "SET_ENABLED", enabled });
-    setState(newState);
+  const handleToggle = (enabled: boolean) => {
+    sendToBackground({ type: "SET_ENABLED", enabled })
+      .then(setState)
+      .catch((err: unknown) => console.error("SET_ENABLED failed:", err));
   };
 
   const openPanel = () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL("panel.html") });
+    void chrome.tabs.create({ url: chrome.runtime.getURL("panel.html") });
   };
 
   return (

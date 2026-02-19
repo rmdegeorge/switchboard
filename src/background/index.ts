@@ -24,6 +24,6 @@ setInterval(() => {
 }, KEEP_ALIVE_INTERVAL_MS);
 
 // Initialize state from storage
-initState().then(() => {
+void initState().then(() => {
   console.log("Network Intercept: Background initialized");
 });

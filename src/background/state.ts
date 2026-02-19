@@ -1,4 +1,4 @@
-import { ExtensionState, InterceptRule, PausedRequest } from "@shared/types";
+import type { ExtensionState, InterceptRule, PausedRequest } from "@shared/types";
 import { loadRules, loadEnabled } from "@shared/storage";
 
 let state: ExtensionState = {

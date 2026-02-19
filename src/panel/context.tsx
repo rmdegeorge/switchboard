@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from "react";
-import { ExtensionState, InterceptRule, PausedRequestResolution } from "@shared/types";
-import { sendToBackground, BackgroundMessage } from "@shared/messages";
+import type { ExtensionState, InterceptRule, PausedRequestResolution } from "@shared/types";
+import type { BackgroundMessage } from "@shared/messages";
+import { sendToBackground } from "@shared/messages";
 
 const initialState: ExtensionState = {
   enabled: false,
@@ -9,9 +10,7 @@ const initialState: ExtensionState = {
   pausedRequests: [],
 };
 
-type Action =
-  | { type: "SET_STATE"; state: ExtensionState }
-  | { type: "SET_VIEW"; view: PanelView };
+type Action = { type: "SET_STATE"; state: ExtensionState } | { type: "SET_VIEW"; view: PanelView };
 
 export type PanelView = "rules" | "paused";
 
@@ -143,13 +142,14 @@ export function PanelProvider({ children }: { children: React.ReactNode }) {
       value={{
         state,
         setView,
-        setEnabled,
-        addRule,
-        updateRule,
-        deleteRule,
-        attachTab,
-        detachTab,
-        resolveRequest,
+        setEnabled: (enabled: boolean) => void setEnabled(enabled),
+        addRule: (rule: InterceptRule) => void addRule(rule),
+        updateRule: (rule: InterceptRule) => void updateRule(rule),
+        deleteRule: (ruleId: string) => void deleteRule(ruleId),
+        attachTab: (tabId: number) => void attachTab(tabId),
+        detachTab: (tabId: number) => void detachTab(tabId),
+        resolveRequest: (requestId: string, tabId: number, resolution: PausedRequestResolution) =>
+          void resolveRequest(requestId, tabId, resolution),
       }}
     >
       {children}

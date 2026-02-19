@@ -1,4 +1,4 @@
-import { InterceptRule } from "./types";
+import type { InterceptRule } from "./types";
 
 const RULES_KEY = "intercept_rules";
 const ENABLED_KEY = "intercept_enabled";
@@ -21,7 +21,7 @@ function isValidRule(val: unknown): val is InterceptRule {
     typeof obj.urlPattern === "string" &&
     typeof obj.label === "string" &&
     typeof obj.requestStage === "string" &&
-    VALID_STAGES.has(obj.requestStage as string) &&
+    VALID_STAGES.has(obj.requestStage) &&
     Array.isArray(obj.resourceTypes) &&
     Array.isArray(obj.httpMethods) &&
     typeof obj.action === "object" &&
@@ -32,9 +32,9 @@ function isValidRule(val: unknown): val is InterceptRule {
 
 export async function loadRules(): Promise<InterceptRule[]> {
   const result = await chrome.storage.local.get(RULES_KEY);
-  const raw = result[RULES_KEY];
+  const raw: unknown = result[RULES_KEY];
   if (!Array.isArray(raw)) return [];
-  return raw.filter((item) => {
+  return (raw as unknown[]).filter((item): item is InterceptRule => {
     if (isValidRule(item)) return true;
     console.warn("loadRules: dropping invalid rule from storage:", item);
     return false;
@@ -47,7 +47,7 @@ export async function saveRules(rules: InterceptRule[]): Promise<void> {
 
 export async function loadEnabled(): Promise<boolean> {
   const result = await chrome.storage.local.get(ENABLED_KEY);
-  const val = result[ENABLED_KEY];
+  const val: unknown = result[ENABLED_KEY];
   return typeof val === "boolean" ? val : false;
 }
 
