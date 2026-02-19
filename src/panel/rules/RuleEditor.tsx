@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { usePanel } from "../context";
-import { InterceptRule, RuleAction, RequestStage } from "@shared/types";
+import { InterceptRule, RuleAction, RequestStage, HttpMethod } from "@shared/types";
 
 interface Props {
   rule: InterceptRule | null;
@@ -10,6 +10,8 @@ interface Props {
 function generateId(): string {
   return `rule_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
+
+const ALL_HTTP_METHODS: HttpMethod[] = ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"];
 
 const defaultAction: RuleAction = { type: "pause" };
 
@@ -21,6 +23,9 @@ export default function RuleEditor({ rule, onClose }: Props) {
   const [urlPattern, setUrlPattern] = useState(rule?.urlPattern ?? "*");
   const [requestStage, setRequestStage] = useState<RequestStage>(rule?.requestStage ?? "Request");
   const [actionType, setActionType] = useState<RuleAction["type"]>(rule?.action.type ?? "pause");
+  const [httpMethods, setHttpMethods] = useState<HttpMethod[]>(
+    rule?.httpMethods?.length ? rule.httpMethods : [...ALL_HTTP_METHODS],
+  );
 
   // Modify-request fields
   const [modUrl, setModUrl] = useState(
@@ -79,6 +84,7 @@ export default function RuleEditor({ rule, onClose }: Props) {
       label,
       urlPattern,
       resourceTypes: [],
+      httpMethods,
       requestStage,
       action: buildAction(),
     };
@@ -108,6 +114,41 @@ export default function RuleEditor({ rule, onClose }: Props) {
           onChange={(e) => setUrlPattern(e.target.value)}
           placeholder="*://api.example.com/*"
         />
+      </div>
+
+      <div className="form-group">
+        <label>HTTP Methods</label>
+        <div className="checkbox-group">
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={httpMethods.length === ALL_HTTP_METHODS.length}
+              ref={(el) => {
+                if (el) el.indeterminate = httpMethods.length > 0 && httpMethods.length < ALL_HTTP_METHODS.length;
+              }}
+              onChange={(e) => {
+                setHttpMethods(e.target.checked ? [...ALL_HTTP_METHODS] : []);
+              }}
+            />
+            <strong>Select All</strong>
+          </label>
+          {ALL_HTTP_METHODS.map((method) => (
+            <label key={method} className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={httpMethods.includes(method)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setHttpMethods([...httpMethods, method]);
+                  } else {
+                    setHttpMethods(httpMethods.filter((m) => m !== method));
+                  }
+                }}
+              />
+              {method}
+            </label>
+          ))}
+        </div>
       </div>
 
       <div className="form-group">

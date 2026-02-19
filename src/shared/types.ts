@@ -18,6 +18,8 @@ export type ResourceType =
   | "Preflight"
   | "Other";
 
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD" | "OPTIONS";
+
 export type RequestStage = "Request" | "Response";
 
 export interface PauseAction {
@@ -55,6 +57,7 @@ export interface InterceptRule {
   enabled: boolean;
   urlPattern: string;
   resourceTypes: ResourceType[];
+  httpMethods: HttpMethod[];
   requestStage: RequestStage;
   action: RuleAction;
   label: string;

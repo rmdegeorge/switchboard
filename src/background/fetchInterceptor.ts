@@ -36,6 +36,10 @@ function matchesRule(
     return false;
   }
 
+  if (rule.httpMethods?.length > 0 && !rule.httpMethods.includes(event.request.method as any)) {
+    return false;
+  }
+
   return true;
 }
 

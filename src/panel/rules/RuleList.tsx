@@ -25,6 +25,7 @@ export default function RuleList({ onEdit }: Props) {
           <th>On</th>
           <th>Label</th>
           <th>URL Pattern</th>
+          <th>Method</th>
           <th>Stage</th>
           <th>Action</th>
           <th>Actions</th>
@@ -42,6 +43,7 @@ export default function RuleList({ onEdit }: Props) {
             </td>
             <td>{rule.label}</td>
             <td className="mono">{rule.urlPattern}</td>
+            <td>{!rule.httpMethods?.length || rule.httpMethods.length === 7 ? "All" : rule.httpMethods.join(", ")}</td>
             <td>{rule.requestStage}</td>
             <td>{rule.action.type}</td>
             <td>
