@@ -43,7 +43,7 @@ export default function App() {
   return (
     <div className="popup">
       <div className="popup-header">
-        <h1>Network Intercept</h1>
+        <h1>Switchboard</h1>
         <StatusIndicator active={state.enabled && state.attachedTabs.length > 0} />
       </div>
 

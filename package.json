@@ -1,5 +1,5 @@
 {
-  "name": "network-intercept-chrome-extension",
+  "name": "switchboard",
   "version": "0.1.0",
   "description": "Chrome extension to intercept, pause, and modify network requests/responses in real-time",
   "private": true,

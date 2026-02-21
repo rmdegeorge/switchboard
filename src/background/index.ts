@@ -25,5 +25,5 @@ setInterval(() => {
 
 // Initialize state from storage
 void initState().then(() => {
-  console.log("Network Intercept: Background initialized");
+  console.log("Switchboard: Background initialized");
 });

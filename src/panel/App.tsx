@@ -11,7 +11,7 @@ function PanelContent() {
   return (
     <div className="panel">
       <header className="panel-header">
-        <h1>Network Intercept</h1>
+        <h1>Switchboard</h1>
         <div className="panel-header-controls">
           <label className="toggle-label">
             <input

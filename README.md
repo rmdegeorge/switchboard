@@ -1,4 +1,4 @@
-# Network Intercept
+# Switchboard
 
 A Chrome extension that intercepts, pauses, and modifies network requests and responses in real-time using the Chrome DevTools Protocol.
 
