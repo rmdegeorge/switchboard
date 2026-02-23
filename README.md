@@ -93,5 +93,5 @@ src/
 
 - TypeScript 5 (strict mode)
 - React 18
-- Webpack 5 (three entry points: background, popup, panel)
+- Vite (three entry points: background, popup, panel)
 - Manifest V3

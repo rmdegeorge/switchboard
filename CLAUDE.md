@@ -18,7 +18,7 @@ Load `dist/` as an unpacked extension in `chrome://extensions` (enable Developer
 
 **Manifest V3** Chrome extension using `chrome.debugger` API + Chrome DevTools Protocol (CDP) `Fetch` domain to intercept, pause, and modify network requests/responses.
 
-### Three entry points (webpack builds each separately)
+### Three entry points (Vite builds each separately)
 
 - **Background** (`src/background/`) — MV3 service worker. Manages debugger lifecycle, intercepts `Fetch.requestPaused` events, routes messages. Single source of truth for all extension state.
 - **Popup** (`src/popup/`) — 350px popup from extension icon. Quick toggle, rule summary, link to full panel.
@@ -50,24 +50,23 @@ All messages typed in `src/shared/messages.ts`. Every UI action sends a message 
 
 ### Static assets
 
-`public/` contains `manifest.json`, HTML templates (`popup.html`, `panel.html`), and `icons/`. Webpack copies these to `dist/` via `CopyWebpackPlugin`.
+`public/` contains `manifest.json` and `icons/`. Vite copies these to `dist/` automatically. HTML entry points (`popup.html`, `panel.html`) live at the project root — Vite processes them as Rollup inputs and injects script/CSS tags.
 
 ## Key Technical Decisions
 
 - **chrome.debugger + CDP Fetch**: Only way to truly pause and modify requests at both request and response stages. Requires "debugger" permission and shows Chrome's debugging banner.
 - **MV3 service worker**: All listeners (`chrome.runtime.onMessage`, `chrome.debugger.onEvent`, `chrome.debugger.onDetach`) **must be registered synchronously** at the top level of `src/background/index.ts`. Async registration will be missed after worker restart.
 - **Keep-alive**: Service workers die after ~30s idle. A `setInterval` pings `chrome.runtime.getPlatformInfo` while paused requests exist.
-- **No eval**: MV3 CSP forbids eval. Webpack devtool uses `cheap-module-source-map` (not eval-based).
+- **No eval**: MV3 CSP forbids eval. Vite uses standard sourcemaps (dev only).
 - **Base64 encoding**: CDP expects base64 for request/response bodies. All `btoa`/`atob` conversion is in `fetchInterceptor.ts`.
 - **Response modification**: Uses `Fetch.fulfillRequest` (not `continueResponse`) when the body or status needs to change.
 - **Paused requests are ephemeral**: Stored in-memory only. Lost if service worker restarts. Rules are persisted in `chrome.storage.local`.
-- **CSS**: Plain CSS with `style-loader` + `css-loader`. No CSS framework.
+- **CSS**: Plain CSS. Vite extracts CSS to separate files and links them in HTML. No CSS framework.
 
 ## Tech Stack
 
 - TypeScript 5.4+ with strict mode
 - React 18 with `react-jsx` transform
-- Webpack 5 with JS configs (`webpack.common.js`, `webpack.dev.js`, `webpack.prod.js`)
-- Path aliases: `@shared/*`, `@background/*`, `@popup/*`, `@panel/*` (configured in both `tsconfig.json` and webpack `resolve.alias`)
-- `ts-loader` with `transpileOnly: true` — type-checking is a separate step (`npm run type-check`)
+- Vite 6 with single config (`vite.config.ts`)
+- Path aliases: `@shared/*`, `@background/*`, `@popup/*`, `@panel/*` (single source of truth in `tsconfig.json`, read by `vite-tsconfig-paths`)
 - ESLint with `@typescript-eslint/parser` (no strict TS rules enabled, `no-unused-vars` and `no-undef` off due to TypeScript handling those)
