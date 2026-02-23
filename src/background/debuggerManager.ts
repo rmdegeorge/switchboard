@@ -19,6 +19,7 @@ export async function attachToTab(tabId: number): Promise<void> {
   addAttachedTab(tabId);
 
   const patterns = buildFetchPatterns(getState().rules);
+  console.log("[Switchboard:debugger] Fetch.enable patterns:", JSON.stringify(patterns));
   await chrome.debugger.sendCommand({ tabId }, "Fetch.enable", {
     patterns: patterns.length > 0 ? patterns : [{ urlPattern: "*", requestStage: "Request" }],
   });

@@ -52,4 +52,12 @@ describe("urlPatternToRegex", () => {
     expect(re.test("https://example.com/api/data")).toBe(true);
     expect(re.test("http://localhost:3000/api/users/123")).toBe(true);
   });
+
+  it("matches wildcard-wrapped domain pattern with query params", () => {
+    const re = urlPatternToRegex("*api.example.com*");
+    expect(re.test("https://api.example.com/v1/users?page=1&limit=10")).toBe(true);
+    expect(re.test("https://api.example.com/")).toBe(true);
+    expect(re.test("https://staging-api.example.com/data")).toBe(true);
+    expect(re.test("https://other.com/api")).toBe(false);
+  });
 });

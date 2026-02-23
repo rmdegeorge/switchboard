@@ -7,7 +7,7 @@ import type {
 import { broadcastToUI } from "@shared/messages";
 import { toBase64, fromBase64 } from "@shared/encoding";
 import { urlPatternToRegex } from "@shared/urlPattern";
-import { getState, addPausedRequest, removePausedRequest } from "./state";
+import { getState, addPausedRequest, removePausedRequest, ready } from "./state";
 
 interface FetchRequestPausedEvent {
   requestId: string;
@@ -56,6 +56,12 @@ function findMatchingRule(
   stage: RequestStage,
 ): InterceptRule | null {
   const { rules, enabled } = getState();
+  console.log("[Switchboard:intercept] findMatchingRule:", {
+    url: event.request.url,
+    stage,
+    enabled,
+    rulesCount: rules.length,
+  });
   if (!enabled) return null;
 
   for (const rule of rules) {
@@ -170,6 +176,7 @@ export async function handleRequestPaused(
   tabId: number,
   event: FetchRequestPausedEvent,
 ): Promise<void> {
+  await ready; // Wait for state to be loaded from storage after service worker restart
   const stage: RequestStage = event.responseStatusCode != null ? "Response" : "Request";
   const rule = findMatchingRule(event, stage);
 
@@ -257,8 +264,12 @@ export async function resolveRequest(
 export function setupFetchInterceptor(): void {
   chrome.debugger.onEvent.addListener((source, method, params) => {
     if (method === "Fetch.requestPaused" && source.tabId != null) {
+      console.log(
+        "[Switchboard:intercept] Fetch.requestPaused event received for tab",
+        source.tabId,
+      );
       handleRequestPaused(source.tabId, params as FetchRequestPausedEvent).catch((err) => {
-        console.error("handleRequestPaused failed:", err);
+        console.error("[Switchboard:intercept] handleRequestPaused failed:", err);
         // Attempt to continue the request so the tab doesn't hang
         if (source.tabId != null) {
           const event = params as FetchRequestPausedEvent;
@@ -269,7 +280,7 @@ export function setupFetchInterceptor(): void {
               requestId: event.requestId,
             })
             .catch((fallbackErr) => {
-              console.warn("setupFetchInterceptor: fallback also failed:", fallbackErr);
+              console.warn("[Switchboard:intercept] fallback continue also failed:", fallbackErr);
             });
         }
       });

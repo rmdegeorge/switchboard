@@ -57,6 +57,11 @@ export async function initState(): Promise<void> {
     const [rules, enabled] = await Promise.all([loadRules(), loadEnabled()]);
     state.rules = rules;
     state.enabled = enabled;
+    console.log("[Switchboard:state] initState complete:", {
+      enabled: state.enabled,
+      rulesCount: state.rules.length,
+      rulePatterns: state.rules.map((r) => r.urlPattern),
+    });
   } catch (err) {
     console.error("initState: failed to load from storage, using defaults:", err);
   } finally {
