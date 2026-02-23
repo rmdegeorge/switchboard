@@ -2,7 +2,7 @@ import { CDP_VERSION } from "@shared/constants";
 import type { InterceptRule } from "@shared/types";
 import { getState, addAttachedTab, removeAttachedTab } from "./state";
 
-function buildFetchPatterns(rules: InterceptRule[]) {
+export function buildFetchPatterns(rules: InterceptRule[]) {
   const enabledRules = rules.filter((r) => r.enabled);
   if (enabledRules.length === 0) {
     return [];

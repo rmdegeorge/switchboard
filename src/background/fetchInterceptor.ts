@@ -9,7 +9,7 @@ import { toBase64, fromBase64 } from "@shared/encoding";
 import { urlPatternToRegex } from "@shared/urlPattern";
 import { getState, addPausedRequest, removePausedRequest, ready } from "./state";
 
-interface FetchRequestPausedEvent {
+export interface FetchRequestPausedEvent {
   requestId: string;
   request: {
     url: string;
@@ -23,13 +23,13 @@ interface FetchRequestPausedEvent {
   responseErrorReason?: string;
 }
 
-function headersRecordToArray(
+export function headersRecordToArray(
   headers: Record<string, string>,
 ): Array<{ name: string; value: string }> {
   return Object.entries(headers).map(([name, value]) => ({ name, value }));
 }
 
-function matchesRule(
+export function matchesRule(
   event: FetchRequestPausedEvent,
   stage: RequestStage,
   rule: InterceptRule,
@@ -51,7 +51,7 @@ function matchesRule(
   return true;
 }
 
-function findMatchingRule(
+export function findMatchingRule(
   event: FetchRequestPausedEvent,
   stage: RequestStage,
 ): InterceptRule | null {
