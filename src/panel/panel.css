@@ -287,6 +287,17 @@ body {
   overflow-y: auto;
 }
 
+.paused-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.paused-sidebar-header h3 {
+  font-size: 14px;
+}
+
 .request-queue h3 {
   font-size: 14px;
   margin-bottom: 8px;
@@ -384,10 +395,44 @@ body {
 
 .request-actions {
   display: flex;
-  gap: 8px;
+  gap: 16px;
   margin-top: 20px;
   padding-top: 16px;
   border-top: 1px solid #f0f0f0;
+}
+
+.action-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.action-description {
+  font-size: 11px;
+  color: #888;
+}
+
+.mock-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.mock-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.mock-response-section {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f5f0ff;
+  border: 1px dashed #c4b5fd;
+  border-radius: 6px;
 }
 
 /* Headers Editor */

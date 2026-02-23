@@ -28,16 +28,28 @@ export default function PausedRequestView({ request }: Props) {
     toEditorHeaders(request.responseHeaders ?? []),
   );
   const [responseCode, setResponseCode] = useState(request.responseStatusCode ?? 200);
+  const [mockMode, setMockMode] = useState(false);
+
+  const isRequest = request.stage === "Request";
 
   const handleContinue = () => {
-    if (request.stage === "Request") {
-      resolveRequest(request.requestId, request.tabId, {
-        type: "continue",
-        modifications: {
-          headers: fromEditorHeaders(headers),
-          postData: postData || undefined,
-        },
-      });
+    if (isRequest) {
+      if (mockMode) {
+        resolveRequest(request.requestId, request.tabId, {
+          type: "fulfill",
+          responseCode,
+          responseHeaders: fromEditorHeaders(responseHeaders),
+          body: responseBody || undefined,
+        });
+      } else {
+        resolveRequest(request.requestId, request.tabId, {
+          type: "continue",
+          modifications: {
+            headers: fromEditorHeaders(headers),
+            postData: postData || undefined,
+          },
+        });
+      }
     } else {
       resolveRequest(request.requestId, request.tabId, {
         type: "continue-response",
@@ -50,21 +62,18 @@ export default function PausedRequestView({ request }: Props) {
     }
   };
 
-  const handleFulfill = () => {
-    resolveRequest(request.requestId, request.tabId, {
-      type: "fulfill",
-      responseCode,
-      responseHeaders: fromEditorHeaders(responseHeaders),
-      body: responseBody || undefined,
-    });
-  };
-
   const handleFail = () => {
     resolveRequest(request.requestId, request.tabId, {
       type: "fail",
       reason: "Failed",
     });
   };
+
+  const continueDescription = isRequest
+    ? mockMode
+      ? "Send the mock response below"
+      : "Forward request to the server"
+    : "Return the response with your edits";
 
   return (
     <div className="request-detail">
@@ -80,14 +89,41 @@ export default function PausedRequestView({ request }: Props) {
         <h3>Request Headers</h3>
         <HeadersEditor headers={headers} onChange={setHeaders} />
 
-        {request.stage === "Request" && (
+        {isRequest && (
           <>
             <h3>Request Body</h3>
             <RequestBodyEditor body={postData} onChange={setPostData} />
+
+            <label className="mock-toggle">
+              <input
+                type="checkbox"
+                checked={mockMode}
+                onChange={(e) => setMockMode(e.target.checked)}
+              />
+              Mock response (skip the server)
+            </label>
+
+            {mockMode && (
+              <div className="mock-response-section">
+                <h3>Response Status</h3>
+                <input
+                  type="number"
+                  className="status-input"
+                  value={responseCode}
+                  onChange={(e) => setResponseCode(Number(e.target.value))}
+                />
+
+                <h3>Response Headers</h3>
+                <HeadersEditor headers={responseHeaders} onChange={setResponseHeaders} />
+
+                <h3>Response Body</h3>
+                <ResponseBodyEditor body={responseBody} onChange={setResponseBody} />
+              </div>
+            )}
           </>
         )}
 
-        {request.stage === "Response" && (
+        {!isRequest && (
           <>
             <h3>Response Status</h3>
             <input
@@ -107,15 +143,18 @@ export default function PausedRequestView({ request }: Props) {
       </div>
 
       <div className="request-actions">
-        <button className="btn btn-primary" onClick={handleContinue}>
-          Continue{request.stage === "Response" ? " (with edits)" : ""}
-        </button>
-        <button className="btn btn-secondary" onClick={handleFulfill}>
-          Fulfill (Mock)
-        </button>
-        <button className="btn btn-danger" onClick={handleFail}>
-          Fail (Abort)
-        </button>
+        <div className="action-group">
+          <button className="btn btn-primary" onClick={handleContinue}>
+            {isRequest ? "Continue" : "Continue (with edits)"}
+          </button>
+          <span className="action-description">{continueDescription}</span>
+        </div>
+        <div className="action-group">
+          <button className="btn btn-danger" onClick={handleFail}>
+            Fail
+          </button>
+          <span className="action-description">Block with a network error</span>
+        </div>
       </div>
     </div>
   );

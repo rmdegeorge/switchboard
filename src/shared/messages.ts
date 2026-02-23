@@ -19,7 +19,8 @@ export type UIMessage =
       requestId: string;
       tabId: number;
       resolution: PausedRequestResolution;
-    };
+    }
+  | { type: "RESOLVE_ALL_REQUESTS" };
 
 // Messages from background → UI
 export type BackgroundMessage =

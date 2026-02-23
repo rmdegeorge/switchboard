@@ -40,6 +40,7 @@ interface PanelContextValue {
   attachTab: (tabId: number) => void;
   detachTab: (tabId: number) => void;
   resolveRequest: (requestId: string, tabId: number, resolution: PausedRequestResolution) => void;
+  releaseAllRequests: () => void;
 }
 
 const PanelContext = createContext<PanelContextValue>(null!);
@@ -137,6 +138,15 @@ export function PanelProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
+  const releaseAllRequests = useCallback(async () => {
+    try {
+      const s = await sendToBackground({ type: "RESOLVE_ALL_REQUESTS" });
+      dispatch({ type: "SET_STATE", state: s });
+    } catch (err) {
+      console.error("releaseAllRequests failed:", err);
+    }
+  }, []);
+
   return (
     <PanelContext.Provider
       value={{
@@ -150,6 +160,7 @@ export function PanelProvider({ children }: { children: React.ReactNode }) {
         detachTab: (tabId: number) => void detachTab(tabId),
         resolveRequest: (requestId: string, tabId: number, resolution: PausedRequestResolution) =>
           void resolveRequest(requestId, tabId, resolution),
+        releaseAllRequests: () => void releaseAllRequests(),
       }}
     >
       {children}

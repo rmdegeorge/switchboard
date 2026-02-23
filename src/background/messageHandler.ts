@@ -25,6 +25,7 @@ async function handleMessage(
     "ATTACH_TAB",
     "DETACH_TAB",
     "RESOLVE_REQUEST",
+    "RESOLVE_ALL_REQUESTS",
   ]);
   if (!message?.type || !UI_MESSAGE_TYPES.has(message.type)) {
     return getState();
@@ -82,6 +83,29 @@ async function handleMessage(
 
     case "RESOLVE_REQUEST": {
       await resolveRequest(message.requestId, message.tabId, message.resolution);
+      return getState();
+    }
+
+    case "RESOLVE_ALL_REQUESTS": {
+      const requests = [...getState().pausedRequests];
+      await Promise.allSettled(
+        requests.map((req) =>
+          resolveRequest(
+            req.requestId,
+            req.tabId,
+            req.stage === "Response"
+              ? {
+                  type: "continue-response",
+                  modifications: {
+                    responseCode: req.responseStatusCode || 200,
+                    responseHeaders: req.responseHeaders ?? [],
+                    body: req.responseBody || undefined,
+                  },
+                }
+              : { type: "continue" },
+          ),
+        ),
+      );
       return getState();
     }
 
